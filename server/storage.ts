@@ -1,23 +1,20 @@
-import { db } from "./db";
-import {
-  messages,
-  type InsertMessage,
-  type Message,
-} from "@shared/schema";
-import { eq } from "drizzle-orm";
+import type { InsertMessage, Message } from "@shared/schema";
 
 export interface IStorage {
   createMessage(message: InsertMessage): Promise<Message>;
 }
 
-export class DatabaseStorage implements IStorage {
+export class MemoryStorage implements IStorage {
+  private currentId = 1;
+
   async createMessage(insertMessage: InsertMessage): Promise<Message> {
-    const [message] = await db
-      .insert(messages)
-      .values(insertMessage)
-      .returning();
+    const message: Message = {
+      ...insertMessage,
+      id: this.currentId++,
+      createdAt: new Date(),
+    };
     return message;
   }
 }
 
-export const storage = new DatabaseStorage();
+export const storage = new MemoryStorage();

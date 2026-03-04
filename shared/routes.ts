@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { insertMessageSchema, messages } from "./schema";
+import { insertMessageSchema, type Message } from "./schema";
 
 export const errorSchemas = {
   validation: z.object({
@@ -18,7 +18,7 @@ export const api = {
       path: "/api/messages" as const,
       input: insertMessageSchema,
       responses: {
-        201: z.custom<typeof messages.$inferSelect>(),
+        201: z.custom<Message>(),
         400: errorSchemas.validation,
       },
     },
