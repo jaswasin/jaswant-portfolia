@@ -39,6 +39,9 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
+
+    // Fetch Medium blog posts dynamically
+    fetchMediumPosts();
 });
 
 // =============================================
@@ -62,6 +65,69 @@ const observer = new IntersectionObserver(function (entries) {
 document.querySelectorAll('.project-card, .experience-item, .achievement-item, .blog-card').forEach(el => {
     observer.observe(el);
 });
+
+// =============================================
+// FETCH MEDIUM BLOG POSTS DYNAMICALLY
+// =============================================
+
+async function fetchMediumPosts() {
+    try {
+        // Using RSS2JSON API to fetch Medium posts (handles CORS)
+        const mediumUsername = 'jaswant.vision';
+        const rssUrl = `https://medium.com/feed/@${mediumUsername}`;
+        const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
+
+        const response = await fetch(apiUrl);
+        const data = await response.json();
+
+        if (data.items && data.items.length > 0) {
+            // Get the blog grid container
+            const blogGrid = document.querySelector('.blog-grid');
+            if (!blogGrid) return;
+
+            // Clear existing blog cards
+            blogGrid.innerHTML = '';
+
+            // Get first 3 posts
+            const posts = data.items.slice(0, 3);
+
+            // Create blog cards for each post
+            posts.forEach(item => {
+                // Extract date from the post
+                const pubDate = new Date(item.pubDate);
+                const formattedDate = pubDate.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+
+                // Clean up description (remove HTML tags)
+                const cleanDescription = item.description
+                    .replace(/<[^>]*>/g, '')
+                    .substring(0, 150)
+                    .trim() + '...';
+
+                // Create blog card HTML
+                const blogCard = document.createElement('article');
+                blogCard.className = 'blog-card';
+                blogCard.innerHTML = `
+                    <div class="blog-date">${formattedDate}</div>
+                    <h3><a href="${item.link}" target="_blank">${item.title}</a></h3>
+                    <p>${cleanDescription}</p>
+                    <a href="${item.link}" class="read-more" target="_blank">Read on Medium →</a>
+                `;
+
+                blogGrid.appendChild(blogCard);
+
+                // Observe new blog cards for animation
+                observer.observe(blogCard);
+            });
+        }
+    } catch (error) {
+        console.log('Could not fetch Medium posts:', error);
+        // Fallback - keep existing blog cards if fetch fails
+    }
+}
 
 // =============================================
 // SCROLL TO TOP BUTTON
