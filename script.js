@@ -205,6 +205,60 @@ style.textContent = `
 document.head.appendChild(style);
 
 // =============================================
+// DYNAMIC FAVICON GENERATOR
+// =============================================
+
+function generateDynamicFavicon() {
+    // Create a canvas element
+    const canvas = document.createElement('canvas');
+    canvas.width = 64;
+    canvas.height = 64;
+    const ctx = canvas.getContext('2d');
+
+    // Create gradient background
+    const gradient = ctx.createLinearGradient(0, 0, 64, 64);
+    gradient.addColorStop(0, '#0066cc');
+    gradient.addColorStop(1, '#0052a3');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, 64, 64);
+
+    // Add border
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(1, 1, 62, 62);
+
+    // Add "JS" text
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 32px Arial, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('JS', 32, 32);
+
+    // Convert canvas to data URL and set as favicon
+    const faviconUrl = canvas.toDataURL('image/png');
+    
+    // Remove old favicon if exists
+    const oldFavicon = document.querySelector("link[rel*='icon']");
+    if (oldFavicon) {
+        oldFavicon.remove();
+    }
+
+    // Create and append new favicon link
+    const link = document.createElement('link');
+    link.rel = 'icon';
+    link.type = 'image/png';
+    link.href = faviconUrl;
+    document.head.appendChild(link);
+}
+
+// Generate favicon on page load
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', generateDynamicFavicon);
+} else {
+    generateDynamicFavicon();
+}
+
+// =============================================
 // FORM HANDLING (if you add a contact form)
 // =============================================
 
